@@ -1,0 +1,15 @@
+{
+  "name": "pixel-socket",
+  "version": "1.0.0",
+  "description": "to live stream from your cam but in pixeled shape",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mohsen Esmaeili <m-esm@hotmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@types/ws": "^6.0.1",
+    "ws": "^7.0.0"
+  }
+}

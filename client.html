@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cient</title>
+
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+
+        }
+
+        body {
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            min-height: 100%;
+        }
+
+        img#view {}
+    </style>
+</head>
+
+<body id="body">
+
+
+
+    </img>
+    <script>
+
+        const ws =
+            new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}/socket_client`);
+
+
+
+        ws.onmessage = (msg) => {
+
+
+            document.getElementById('body').setAttribute('style', 'background-image:url(' + msg.data + ')')
+
+
+        }
+        ws.onopen = () => {
+            console.log('ws open');
+
+        }
+        ws.onerror = (error) => {
+            console.log('ws error', error);
+
+        }
+
+    </script>
+</body>
+
+</html>

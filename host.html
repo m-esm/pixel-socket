@@ -193,7 +193,7 @@
             console.log('ws open');
             navigator.mediaDevices.enumerateDevices()
             .then(gotDevices).then(getStream).catch(handleError);
-            
+
         }
         ws.onerror = (error) => {
             console.log('ws error', error);
@@ -300,8 +300,9 @@
                     }
                 }
 
-                 clearTrashes(squareWidth, validPixelRate);
-                  clearTrashes(64, 500);
+               //  clearTrashes(squareWidth, validPixelRate);
+            //  clearTrashes(32, 500);
+                // clearTrashes(64, 1500);
 
                 const renderImage = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -316,7 +317,7 @@
 
                 setTimeout(() => {
                     draw();
-                }, 500)
+                }, 100)
             }
 
 

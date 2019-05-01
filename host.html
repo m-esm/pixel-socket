@@ -101,7 +101,7 @@
 
 
     </div>
-  
+
     <script>
 
         var videoElement = document.querySelector('video');
@@ -117,7 +117,7 @@
 
 
 
- 
+
 
         function gotDevices(deviceInfos) {
             for (var i = 0; i !== deviceInfos.length; ++i) {
@@ -299,8 +299,8 @@
                     }
                 }
 
-                // clearTrashes(squareWidth, validPixelRate);
-                // clearTrashes(64, 500);
+                 clearTrashes(squareWidth, validPixelRate);
+                  clearTrashes(64, 500);
 
                 const renderImage = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -310,12 +310,12 @@
 
                 // });
 
-                if (ws.OPEN)
+                if (ws.OPEN && !ws.CONNECTING)
                     ws.send(canvas.toDataURL('image/png'));
 
                 setTimeout(() => {
                     draw();
-                }, 100)
+                }, 500)
             }
 
 

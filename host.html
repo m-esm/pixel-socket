@@ -17,7 +17,8 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
+            background-color: #000;
+            color: #fff;
         }
 
         .view {
@@ -38,20 +39,19 @@
         }
 
         video {
-            opacity: 0;
             position: absolute;
             top: 0;
-            left: 0;
-            z-index: -1;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            z-index: 1;
+            width: 300px;
+            height: auto;
         }
 
         canvas {
             margin: 30px auto;
             display: block;
             width: 100%;
-            max-width: 640px;
+            max-width: 100%;
 
         }
 
@@ -64,11 +64,60 @@
         .select-source {
             display: none;
         }
+
+
+        canvas#render {
+            position: fixed;
+            width: auto;
+            height: 100%;
+            top: 0%;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            opacity: 0.5;
+        }
     </style>
 </head>
 
 <body>
 
+    <label for="">FB
+        <input type="range" step="1" value="15" min="10" max="255" id="fbInput">
+    </label>
+
+    <label for="">
+        FD
+        <input type="range" step="1" min="0" value="27" max="255" id="fdInput">
+
+    </label>
+
+    <br>
+
+    <label for="">
+        Trash box
+        <input type="range" step="1" min="5" value="50" max="3000" id="trashInput">
+
+    </label>
+
+    <label for="">
+        Max Pixel in trash box
+        <input type="range" step="1" min="5" value="300" max="25000" id="trashPixelInput">
+
+    </label>
+
+<br>
+
+    <label for="">
+        Trash box 2
+        <input type="range" step="1" min="0" value="200" max="300" id="trashInput2">
+
+    </label>
+
+    <label for="">
+        Max Pixel in trash box 2
+        <input type="range" step="1" min="0" value="100" max="25000" id="trashPixelInput2">
+
+    </label>
 
 
     <div id="container">
@@ -103,7 +152,6 @@
     </div>
 
     <script>
-
         var videoElement = document.querySelector('video');
         var audioSelect = document.querySelector('select#audioSource');
         var videoSelect = document.querySelector('select#videoSource');
@@ -112,10 +160,6 @@
 
         audioSelect.onchange = getStream;
         videoSelect.onchange = getStream;
-
-
-
-
 
 
         function gotDevices(deviceInfos) {
@@ -150,12 +194,14 @@
                 // },
                 audio: false,
                 video: {
-                    deviceId: { exact: videoSelect.value }
+                    deviceId: {
+                        exact: videoSelect.value
+                    }
                 }
             };
 
             navigator.mediaDevices.getUserMedia(constraints).
-                then(gotStream).catch(handleError);
+            then(gotStream).catch(handleError);
         }
 
 
@@ -181,10 +227,11 @@
 
         // };
 
-        let squareWidth = 10;
-        let validPixelRate = 50;
+        let squareWidth = 35;
+        let validPixelRate = 500;
         const ws =
-            new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}/socket_host`);
+            new WebSocket(
+                `${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}/socket_host`);
 
 
 
@@ -192,7 +239,7 @@
         ws.onopen = () => {
             console.log('ws open');
             navigator.mediaDevices.enumerateDevices()
-            .then(gotDevices).then(getStream).catch(handleError);
+                .then(gotDevices).then(getStream).catch(handleError);
 
         }
         ws.onerror = (error) => {
@@ -246,22 +293,25 @@
 
                     if (redValue > greenValue - 10 && redValue > blueValue + 0) {
 
-                        data[i] = 0;
-                        data[i + 1] = 0;
-                        data[i + 2] = 0;
+                        data[i] = 255;
+                        data[i + 1] = 255;
+                        data[i + 2] = 255;
 
                     } else {
 
-                        data[i] = 255; // Invert Red
-                        data[i + 1] = 255; // Invert Green
-                        data[i + 2] = 255; // Invert Blue
+                        data[i] = 0; // Invert Red
+                        data[i + 1] = 0; // Invert Green
+                        data[i + 2] = 0; // Invert Blue
+                        data[i + 3] = 0; // Invert Blue
 
                     }
 
                     if (greenValue > blueValue) {
-                        data[i] = 255; // Invert Red
-                        data[i + 1] = 255; // Invert Green
-                        data[i + 2] = 255; // Invert Bluet
+                        data[i] = 0; // Invert Red
+                        data[i + 1] = 0; // Invert Green
+                        data[i + 2] = 0; // Invert Bluet
+                        data[i + 3] = 0; // Invert Blue
+
                     }
 
                     // const output = net.run({ r: data[i], g: data[i + 1], b: data[i + 2] });  // { white: 0.81, black: 0.18 }
@@ -287,10 +337,13 @@
 
                             //                    console.log(square.data.filter(p => p != 255).length)
 
-                            if (square.data.filter(p => p != 255).length < pixelRate) {
+                            if (square.data.filter(p => p == 255).length < pixelRate) {
 
-                                for (let si = 0; si < square.data.length; si++) {
-                                    square.data[si] = 255;
+                                for (let si = 0; si < square.data.length; si += 4) {
+                                    square.data[si + 0] = 0;
+                                    square.data[si + 1] = 0;
+                                    square.data[si + 2] = 0;
+                                    square.data[si + 3] = 0;
                                 }
                                 canvasContext.putImageData(square, sc * sw, sr * sw)
                             } else {
@@ -300,11 +353,70 @@
                     }
                 }
 
-               //  clearTrashes(squareWidth, validPixelRate);
-            //  clearTrashes(32, 500);
-                // clearTrashes(64, 1500);
 
-                const renderImage = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                const fadeEdges = (sw) => {
+
+                    for (let sr = 0; sr < Math.ceil(canvas.height / sw); sr++) {
+
+                        for (let sc = 0; sc < Math.ceil(canvas.width / sw); sc++) {
+
+                            const square = canvasContext.getImageData(sc * sw, sr * sw, sw, sw);
+
+
+                            for (let fb = 0; fb < parseInt(document.querySelector('#fbInput').value); fb++) {
+
+
+                                if (sr == fb || sr == Math.ceil(canvas.height / sw) - 1 - fb || sc == fb ||
+                                    sc == Math
+                                    .ceil(canvas.width / sw) - 1 - fb)
+                                    for (let si = 0; si < square.data.length; si += 4) {
+                                        if (Math.random() > fb * .1) {
+
+                                            // square.data[si] = fb;
+                                            // square.data[si + 1] = 255;
+                                            // square.data[si + 2] = 255;
+                                            // square.data[si + 3] = 255;
+
+                                            square.data[si + 3] = fb;
+
+
+                                        }
+
+
+
+                                    }
+
+                            }
+                            // if (sr == 1 || sr == Math.ceil(canvas.height / sw) - 2 || sc == 1 || sc == Math
+                            // .ceil(canvas.width / sw) - 2)
+                            // for (let si = 0; si < square.data.length; si += 4) {
+                            //     if (Math.random() > .3) {
+                            //         square.data[si + 3] = 0;
+                            //     }
+                            // }
+
+                            canvasContext.putImageData(square, sc * sw, sr * sw)
+
+                        }
+                    }
+
+                }
+
+
+
+
+
+                // clearTrashes(parseInt(document.querySelector('#trashInput').value), parseInt(document.querySelector(
+                //     '#trashPixelInput').value));
+                //     fadeEdges(parseInt(document.querySelector('#fdInput').value));
+
+                    // clearTrashes(parseInt(document.querySelector('#trashInput2').value), parseInt(document.querySelector(
+                    // '#trashPixelInput2').value));
+           
+           clearTrashes(50,350);
+                    fadeEdges(30);
+
+                //  const renderImage = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
 
                 // const fileReader = new FileReader();
                 // fileReader.readAsDataURL(new Blob(renderImage.data));
@@ -312,12 +424,12 @@
 
                 // });
 
-                if (ws.OPEN && !ws.CONNECTING)
-                    ws.send(canvas.toDataURL('image/png'));
+                // if (ws.OPEN && !ws.CONNECTING)
+                //     ws.send(canvas.toDataURL('image/png'));
 
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     draw();
-                }, 500)
+                } )
             }
 
 
@@ -332,8 +444,6 @@
         function handleError(error) {
             console.log('Error: ', error);
         }
-
-
     </script>
 
 

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=device-width">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pixel Socket - to stream your cam in pixelated way</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .view {
+            position: relative;
+
+        }
+
+        .select {
+            margin: 10px;
+
+        }
+
+        .color {
+            width: 100%;
+            height: 20px;
+            border-radius: 0;
+            background: #000;
+        }
+
+        video {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1;
+            width: 300px;
+            height: auto;
+        }
+
+        canvas {
+            margin: 30px auto;
+            display: block;
+            width: 100%;
+            max-width: 100%;
+
+        }
+
+        .clear {
+            clear: both;
+            content: ' ';
+            display: block;
+        }
+
+        .select-source {
+            display: none;
+        }
+
+
+        canvas#render {
+            position: fixed;
+            width: auto;
+            height: 100%;
+            top: 0%;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <label for="">FB
+        <input type="range" step="1" value="15" min="10" max="255" id="fbInput">
+    </label>
+
+    <label for="">
+        FD
+        <input type="range" step="1" min="0" value="27" max="255" id="fdInput">
+
+    </label>
+
+    <br>
+
+    <label for="">
+        Trash box
+        <input type="range" step="1" min="5" value="50" max="3000" id="trashInput">
+
+    </label>
+
+    <label for="">
+        Max Pixel in trash box
+        <input type="range" step="1" min="5" value="300" max="25000" id="trashPixelInput">
+
+    </label>
+
+    <br>
+
+    <label for="">
+        Trash box 2
+        <input type="range" step="1" min="0" value="200" max="300" id="trashInput2">
+
+    </label>
+
+    <label for="">
+        Max Pixel in trash box 2
+        <input type="range" step="1" min="0" value="100" max="25000" id="trashPixelInput2">
+
+    </label>
+
+
+    <div id="container">
+
+        <!-- <div class="color"></div> -->
+
+
+        <div class="select-source">
+            <label for="audioSource">Audio source: </label><select id="audioSource"></select>
+        </div>
+
+        <div class="select-source">
+            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+        </div>
+
+        <div class="view">
+
+            <div class=" video">
+                <!-- <video muted autoplay></video> -->
+                <video muted controls autoplay>
+
+                    <source src="test.mp4">
+
+                </video>
+            </div>
+
+            <div class="canvas">
+                <canvas id="render"></canvas>
+
+            </div>
+
+
+            <div class="clear"></div>
+        </div>
+
+
+    </div>
+
+    <script>
+        var videoElement = document.querySelector('video');
+        var audioSelect = document.querySelector('select#audioSource');
+        var videoSelect = document.querySelector('select#videoSource');
+
+
+
+        const draw = () => {
+
+            try {
+
+
+                const frameCanvas = document.createElement('canvas');
+                const canvas = document.querySelector('canvas');
+                frameCanvas.width = canvas.width = videoElement.videoWidth;
+                frameCanvas.height = canvas.height = videoElement.videoHeight;
+                const frameCanvasContext = frameCanvas.getContext('2d');
+                const canvasContext = canvas.getContext('2d');
+
+                frameCanvasContext.drawImage(videoElement, 0, 0);
+                let frameImage;
+
+                frameImage = (frameCanvasContext.getImageData(0, 0, canvas.width, canvas.height))
+
+
+                const data = frameImage.data;
+                const roundTo = 100;
+
+
+                // for (var i = 0; i < data.length; i += 4) {
+
+                //     // data[i] = Math.ceil(data[i] / roundTo) * roundTo; // Invert Red
+                //     // data[i + 1] = Math.ceil(data[i + 1] / roundTo) * roundTo // Invert Green
+                //     // data[i + 2] = Math.ceil(data[i + 2] / roundTo) * roundTo; // Invert Blue
+
+                //     // data[i] = data[i] ^ 255; // Invert Red
+                //     // data[i + 1] = data[i + 1] ^ 255; // Invert Green
+                //     // data[i + 2] = data[i + 2] ^ 255; // Invert Blue
+
+                //     var redValue = data[i];
+                //     var greenValue = data[i + 1];
+                //     var blueValue = data[i + 2];
+
+
+
+
+                //     if (redValue > greenValue - 10 && redValue > blueValue   ) {
+
+                //         data[i] = 255;
+                //         data[i + 1] = 255;
+                //         data[i + 2] = 100;
+                //         data[i + 3] = 255;
+
+                //     } else {
+
+                //         data[i] = 100; // Invert Red
+                //         data[i + 1] = 255; // Invert Green
+                //         data[i + 2] = 255; // Invert Blue
+                //         data[i + 3] = 255; // Invert Blue
+
+                //     }
+
+                //     if (greenValue > blueValue) {
+                //         data[i] = 255; // Invert Red
+                //         data[i + 1] = 100; // Invert Green
+                //         data[i + 2] = 255; // Invert Bluet
+                //         data[i + 3] = 255; // Invert Blue
+
+                //     }
+
+                //     // const output = net.run({ r: data[i], g: data[i + 1], b: data[i + 2] });  // { white: 0.81, black: 0.18 }
+                //     // if (output.white < output.black) {
+                //     //     data[i] = 255; // Invert Red
+                //     //     data[i + 1] = 255; // Invert Green
+                //     //     data[i + 2] = 255; // Invert Blue
+                //     // }
+
+                // }
+
+
+
+                canvasContext.putImageData(frameImage, 0, 0)
+
+
+                const clearTrashes = (sw, pixelRate) => {
+                    for (let sr = 0; sr < Math.ceil(canvas.height / sw); sr++) {
+
+                        for (let sc = 0; sc < Math.ceil(canvas.width / sw); sc++) {
+
+                            const square = canvasContext.getImageData(sc * sw, sr * sw, sw, sw);
+
+                            //                    console.log(square.data.filter(p => p != 255).length)
+
+                            if (square.data.filter(p => p == 255).length < pixelRate) {
+
+                                for (let si = 0; si < square.data.length; si += 4) {
+                                    square.data[si + 0] = 0;
+                                    square.data[si + 1] = 0;
+                                    square.data[si + 2] = 0;
+                                    square.data[si + 3] = 0;
+                                }
+                                canvasContext.putImageData(square, sc * sw, sr * sw)
+                            } else {
+
+                            }
+                        }
+                    }
+                }
+
+
+                const fadeEdges = (sw) => {
+
+                    for (let sr = 0; sr < Math.ceil(canvas.height / sw); sr++) {
+
+                        for (let sc = 0; sc < Math.ceil(canvas.width / sw); sc++) {
+
+                            const square = canvasContext.getImageData(sc * sw, sr * sw, sw, sw);
+
+
+                            for (let fb = 0; fb < parseInt(document.querySelector('#fbInput').value); fb++) {
+
+
+                                if (sr == fb || sr == Math.ceil(canvas.height / sw) - 1 - fb || sc == fb ||
+                                    sc == Math
+                                    .ceil(canvas.width / sw) - 1 - fb)
+                                    for (let si = 0; si < square.data.length; si += 4) {
+                                        if (Math.random() > fb * .1) {
+
+                                            // square.data[si] = fb;
+                                            // square.data[si + 1] = 255;
+                                            // square.data[si + 2] = 255;
+                                            // square.data[si + 3] = 255;
+
+                                            square.data[si + 3] = fb;
+
+
+                                        }
+
+
+
+                                    }
+
+                            }
+                            // if (sr == 1 || sr == Math.ceil(canvas.height / sw) - 2 || sc == 1 || sc == Math
+                            // .ceil(canvas.width / sw) - 2)
+                            // for (let si = 0; si < square.data.length; si += 4) {
+                            //     if (Math.random() > .3) {
+                            //         square.data[si + 3] = 0;
+                            //     }
+                            // }
+
+                            canvasContext.putImageData(square, sc * sw, sr * sw)
+
+                        }
+                    }
+
+                }
+
+
+
+
+
+                // clearTrashes(parseInt(document.querySelector('#trashInput').value), parseInt(document.querySelector(
+                //     '#trashPixelInput').value));
+                //     fadeEdges(parseInt(document.querySelector('#fdInput').value));
+
+                // clearTrashes(parseInt(document.querySelector('#trashInput2').value), parseInt(document.querySelector(
+                // '#trashPixelInput2').value));
+
+              //  clearTrashes(50, 150);
+                fadeEdges(27);
+
+                //  const renderImage = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+
+                // const fileReader = new FileReader();
+                // fileReader.readAsDataURL(new Blob(renderImage.data));
+                // fileReader.onloadend = ((ev) => {
+
+                // });
+
+                // if (ws.OPEN && !ws.CONNECTING)
+                //     ws.send(canvas.toDataURL('image/png'));
+            } catch (error) {
+
+            }
+            requestAnimationFrame(() => {
+                draw();
+            })
+        }
+
+
+        setTimeout(() => {
+            draw();
+
+
+        }, 500);
+    </script>
+
+
+
+</body>
+
+</html>

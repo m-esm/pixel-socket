@@ -250,11 +250,7 @@
         function gotStream(stream) {
             window.stream = stream; // make stream available to console
             videoElement.srcObject = stream;
-
-
-
-
-
+ 
             const draw = () => {
 
                 const frameCanvas = document.createElement('canvas');
@@ -424,8 +420,8 @@
 
                 // });
 
-                // if (ws.OPEN && !ws.CONNECTING)
-                //     ws.send(canvas.toDataURL('image/png'));
+                if (ws.OPEN && !ws.CONNECTING)
+                    ws.send(canvas.toDataURL('image/png'));
 
                 requestAnimationFrame(() => {
                     draw();

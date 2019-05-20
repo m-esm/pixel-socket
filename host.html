@@ -105,7 +105,7 @@
 
     </label>
 
-<br>
+    <br>
 
     <label for="">
         Trash box 2
@@ -250,7 +250,7 @@
         function gotStream(stream) {
             window.stream = stream; // make stream available to console
             videoElement.srcObject = stream;
- 
+
             const draw = () => {
 
                 const frameCanvas = document.createElement('canvas');
@@ -406,11 +406,11 @@
                 //     '#trashPixelInput').value));
                 //     fadeEdges(parseInt(document.querySelector('#fdInput').value));
 
-                    // clearTrashes(parseInt(document.querySelector('#trashInput2').value), parseInt(document.querySelector(
-                    // '#trashPixelInput2').value));
-           
-           clearTrashes(50,350);
-                    fadeEdges(30);
+                // clearTrashes(parseInt(document.querySelector('#trashInput2').value), parseInt(document.querySelector(
+                // '#trashPixelInput2').value));
+
+                clearTrashes(50, 350);
+                fadeEdges(30);
 
                 //  const renderImage = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -423,9 +423,9 @@
                 if (ws.OPEN && !ws.CONNECTING)
                     ws.send(canvas.toDataURL('image/png'));
 
-                requestAnimationFrame(() => {
+                setTimeout(() => {
                     draw();
-                } )
+                }, 500);
             }
 
 
